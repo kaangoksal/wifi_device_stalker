@@ -127,38 +127,17 @@ class iwconfigWrapper(object):
 
     @staticmethod
     def get_wifi_interfaces():
+        """
+        Returns the current wifi interface names.
+        :return: a list of current interfaces
+        """
         result = subprocess.getoutput("iwconfig")
         resultarray = result.split("\n")
-        interfaces = {}
-        current_data = []
-        current_interface = ""
+        interfaces = []
         for line in resultarray:
-            #print(line)
-            if "no wireless extensions" in line:
-                #print("nothing")
-                pass
-            elif line == "":
-                #print("bop")
-                if len(current_data) > 0 and current_interface != "":
-                    #print("Data logged ", current_interface)
-                    interfaces[current_interface] = current_data
-                    current_interface = ""
-                    current_data = []
-            elif "IEEE 802.11" in line:
-                if len(current_data) > 0 and current_interface != "":
-                    #print("Data logged ", current_interface)
-                    interfaces[current_interface] = current_data
-                    current_interface = ""
-                    current_data = []
-
-                # means that we foun a wireless interface
-                current_interface = line[:line.index(" ")]
-                current_data.append(line)
-                #print("NAME ", current_interface)
-            else:
-                #print("array |", line, "|end")
-                current_data.append(line)
-        return list(interfaces.keys())
+            if "IEEE 802.11" in line:
+                interfaces.append(line[:line.index(" ")])
+        return list(interfaces)
 
 
 
