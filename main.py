@@ -1,6 +1,6 @@
 from wifiInterface import wifi_device_sniffer_Interface
 from wifi_tool_wrappers import iwconfigWrapper
-from models.wifi_models import WifiClient, AccessPoint
+from models.wifi_models import WifiClient, AccessPoint, WifiAcessPointSession, WifiClientSession
 import os
 import time
 from threading import Thread
@@ -12,8 +12,6 @@ class main:
         self.access_point_sessions = {}
 
 
-        self.found_devices = set()
-        self.found_access_points = set()
         self.status = 1
 
         interface_to_use = self.select_wifi_interface()
@@ -21,15 +19,15 @@ class main:
         # We are creating a wifi device sniffer interface
         self.start_sniffing_with_device(interface_to_use)
 
+        #  TODO think about displaying the data somehow... either tkinter or some web shit...
 
 
-
-        while 1:
-            time.sleep(1)
-            os.system('clear')
-            print(len(self.found_devices))
-            #self.print_devices()
-            #self.print_aps()
+        # while 1:
+        #     time.sleep(1)
+        #     os.system('clear')
+        #     print(len(self.found_devices))
+        #     #self.print_devices()
+        #     #self.print_aps()
 
     def start_sniffing_with_device(self, device):
         """
@@ -88,20 +86,37 @@ class main:
 
         # We should organize the data!
         if type(new_device) == AccessPoint:
-            self.found_access_points.add(new_device)
+            # todo check whether this is the first time witnessing this access point and record that to the sql
+            access_point_session = self.access_point_sessions.get(new_device.bssid_address, None)
+            if access_point_session is None:
+                # This means that this is the first session (as of current timeframe = 5 mins) that we are experiencing
+                # with this access point, therefore we need to open a new session!
+                access_point_session = WifiAcessPointSession(new_device)
+                self.access_point_sessions[new_device.bssid_address] = access_point_session
+            else:
+                access_point_session.parse_data(new_device)
 
         elif type(new_device) == WifiClient:
-            self.found_devices.add(new_device)
+            # TODO check whether this is the first time witnessing this client and also record that to the sql
+            client_session = self.client_sessions.get(new_device.mac_address, None)
+            if client_session is None:
+                # This means that we are seeing this client newly! (as of current timeframe = 5mins) so we should
+                # open a new client session and record the stuff that we are collecting about this client
+                client_session = WifiClientSession(new_device)
+                self.client_sessions[new_device.mac_address] = client_session
+            else:
+                client_session.parse_data(new_device)
 
-    def print_devices(self):
-        print("===========Clients==============")
-        for device in list(self.found_devices):
-            print(device)
 
-    def print_aps(self):
-        print("===============APs=================")
-        for ap in list(self.found_access_points):
-            print(ap)
+    # def print_devices(self):
+    #     print("===========Clients==============")
+    #     for device in list(self.found_devices):
+    #         print(device)
+    #
+    # def print_aps(self):
+    #     print("===============APs=================")
+    #     for ap in list(self.found_access_points):
+    #         print(ap)
 
 
 new_pp = main()

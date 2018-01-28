@@ -18,11 +18,12 @@ class WifiClientSession_dbModel(Base):
         if session_start is not None:
             self.session_start = session_start
 
-    def end_session(self, end_time =None):
-        if end_time is not None
+    def end_session(self, end_time = None):
+        if end_time is not None:
             self.session_end = end_time
         else:
             self.session_end = func.now()
+
 
 class WifiClientSession_connected_access_points(Base):
 
