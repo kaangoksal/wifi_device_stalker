@@ -4,7 +4,7 @@ from scapy.layers.dot11 import *
 from threading import Thread
 import time
 from queue import Queue
-from wifi_models import WifiClient, AccessPoint
+from models.wifi_models import WifiClient, AccessPoint
 from wifi_tool_wrappers import ipWrapper, iwconfigWrapper, iwlistWrapper, iwWrapper, wifiModes
 import enum
 
@@ -153,6 +153,10 @@ class wifi_device_sniffer_Interface(object):
         self.found_devices.put(new_client)
 
     def filter_clients_and_access_points(self, packet):
+        print(type(packet))
+        print("=============================")
+        print(packet)
+        print("=============================")
 
         if packet.haslayer(Dot11):
             if packet.addr1 and packet.addr2:

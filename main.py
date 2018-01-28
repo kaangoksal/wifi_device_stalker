@@ -1,6 +1,6 @@
 from wifiInterface import wifi_device_sniffer_Interface
-from wifi_tool_wrappers import iwconfigWrapper, iwWrapper, ipWrapper, iwlistWrapper
-from wifi_models import WifiClient, AccessPoint
+from wifi_tool_wrappers import iwconfigWrapper
+from models.wifi_models import WifiClient, AccessPoint
 import os
 import time
 from threading import Thread
@@ -8,6 +8,10 @@ from threading import Thread
 
 class main:
     def __init__(self):
+        self.client_sessions = {}
+        self.access_point_sessions = {}
+
+
         self.found_devices = set()
         self.found_access_points = set()
         self.status = 1
@@ -15,18 +19,30 @@ class main:
         interface_to_use = self.select_wifi_interface()
 
         # We are creating a wifi device sniffer interface
-        selected_interface = wifi_device_sniffer_Interface("Sniff1", interface_to_use)
-        selected_interface.start_wifi_monitor_mode()
-        selected_interface.start_searching()
+        self.start_sniffing_with_device(interface_to_use)
 
-        device_thread = Thread(target=self.device_loop, args=[selected_interface])
-        device_thread.start()
-        print("Started the device Thread")
+
+
+
         while 1:
             time.sleep(1)
             os.system('clear')
             print(len(self.found_devices))
-            self.print_devices()
+            #self.print_devices()
+            #self.print_aps()
+
+    def start_sniffing_with_device(self, device):
+        """
+        Switches the device to monitor mode and starts capturing packets with it.
+        :param device: the device object, NOT THE STRING DEVICE NAME
+        :return: nothing
+        """
+        selected_interface = wifi_device_sniffer_Interface("Sniff1", device)
+        selected_interface.start_wifi_monitor_mode()
+        selected_interface.start_searching()
+        device_thread = Thread(target=self.device_loop, args=[selected_interface])
+        device_thread.start()
+        print("Device ", device, " started sniffing")
 
     def select_wifi_interface(self):
         """
@@ -49,15 +65,15 @@ class main:
 
     def device_loop(self, device):
         """
-        This method will contionusly poll the device, the collect_data_from_interface method is actually a blocking call
+        This method will continuously poll the device, the collect_data_from_interface method is actually a blocking call
         so this should not cause a CPU spin.
         :param device:
         :return:
         """
-        print("Device loop started")
+        #print("Device loop started")
         while self.status:
             self.collect_data_from_interface(device)
-        print("Device loop terminated")
+        #print("Device loop terminated")
 
     def collect_data_from_interface(self, interface):
         """
@@ -69,6 +85,8 @@ class main:
         new_device = interface.found_devices.get()
 
         #print("Found new device!")
+
+        # We should organize the data!
         if type(new_device) == AccessPoint:
             self.found_access_points.add(new_device)
 
@@ -76,10 +94,14 @@ class main:
             self.found_devices.add(new_device)
 
     def print_devices(self):
-        print("===========New Result==============")
-
+        print("===========Clients==============")
         for device in list(self.found_devices):
             print(device)
+
+    def print_aps(self):
+        print("===============APs=================")
+        for ap in list(self.found_access_points):
+            print(ap)
 
 
 new_pp = main()
