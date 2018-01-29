@@ -24,6 +24,14 @@ raspberry pi will be the sensor suite.
 
 This project is still in progress... 
 
+This is probably how will it look like:
+
+![Alt text](https://github.com/kaangoksal/wifi_device_stalker/blob/master/media/Dashboard.png)
+
+
+Live view page
+
+![Alt text](https://github.com/kaangoksal/wifi_device_stalker/blob/master/media/Live%20View.png)
 
 **Up Coming Features**
 
