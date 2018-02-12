@@ -23,4 +23,4 @@ Base = declarative_base()
 DBSession = sessionmaker(bind=engine)
 
 
-session = DBSession()
+db_session = DBSession()

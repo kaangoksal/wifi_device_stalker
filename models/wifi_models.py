@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from threading import Timer
 
 
@@ -21,7 +21,7 @@ class AccessPoint(object):
         """
         bssid_string = self.bssid_address
 
-        #the hash calls the original has function
+        # the hash calls the original has function
         return bssid_string.__hash__()
 
     def __eq__(self,other):
@@ -64,16 +64,16 @@ class WifiClientSession(object):
     # TODO finish exceptions
 
     def __init__(self, client_object):
-
+        self.id = None # this is for relating to the db model
         self.client = client_object.mac_address
-        self.session_start = None
+        self.session_start = datetime.now()
         self.session_stop = None
 
         self.session_extend = False
         self.session_time = 300  # this is in seconds
         self.session_timer = None
 
-        self.connected_access_points = [] #this should include the time of spotting
+        self.connected_access_points = [] # this should include the time of spotting
         self.current_access_point = None
 
         self.spotted_channels = [client_object.channel] # this is also going to be time vs channel
@@ -83,10 +83,29 @@ class WifiClientSession(object):
         self.current_power_level = None
 
     def parse_data(self, client_object):
+        """
+        This method takes an client_object object and looks at the data of the object, if the object includes new data
+        it records. It also updates the session extend flag since we got data about the client
+        :param client_object: wificlient object
+        :return:
+        """
         if client_object is None:
             raise Exception("None client object is not allowed")
 
-        # TODO check client object data to add acccess points and such..
+        self.session_extend = True # We should extend the session if we received data about this particular client!
+
+        if client_object.connected_access_point is not None \
+                and client_object.connected_access_point not in self.connected_access_points:
+            self.connected_access_points.append(client_object.connected_access_point)
+
+        if client_object.channel is not None and client_object.channel not in self.spotted_channels:
+            self.spotted_channels.append(client_object.channel)
+
+        if client_object.power_level is not None:
+            minute_difference = datetime.now() - self.session_start
+            minute_difference= (minute_difference.total_seconds()/60)
+            self.observed_power_levels.append((minute_difference, client_object.power_level))
+
 
     def record_connected_access_point(self, access_point):
         """
@@ -101,7 +120,7 @@ class WifiClientSession(object):
         if self.current_access_point == access_point:
             pass
         else:
-            self.connected_access_points.append((access_point, datetime.datetime.now()))
+            self.connected_access_points.append((access_point, datetime.now()))
 
     def record_spotted_channel(self, channel):
         """
@@ -112,7 +131,7 @@ class WifiClientSession(object):
         if self.current_channel == channel:
             pass
         else:
-            self.spotted_channels.append((channel, datetime.datetime.now()))
+            self.spotted_channels.append((channel, datetime.now()))
 
     def record_rssi(self, rssi):
         """
@@ -120,7 +139,7 @@ class WifiClientSession(object):
         :param rssi: observed signal strength as interger
         :return:
         """
-        self.observed_power_levels.append((rssi, datetime.datetime.now()))
+        self.observed_power_levels.append((rssi, datetime.now()))
 
     def stop_session(self):
         """
@@ -129,7 +148,7 @@ class WifiClientSession(object):
         """
         if self.session_stop is not None:
             raise Exception("Session is already closed")
-        self.session_stop = datetime.datetime.now()
+        self.session_stop = datetime.now()
 
     def continue_session(self):
         """
@@ -157,9 +176,9 @@ class WifiAcessPointSession(object):
     # TODO finish exceptions
 
     def __init__(self, access_point):
-
+        self.id = None # This is for relating to the db model
         self.bssid = access_point.bssid_address
-        self.session_start = None
+        self.session_start = datetime.now()
         self.session_stop = None
 
         self.session_extend = False
@@ -175,13 +194,33 @@ class WifiAcessPointSession(object):
         self.observed_power_levels = []  # this is going to be time vs power level pair
         self.current_power_level = None
 
+        self.ssid = ""
+        self.observed_ssids = []
+
     def parse_data(self, acces_point_object):
+        """
+        This method takes an acces_point_object object and looks at the data of the object, if the object includes new data
+        it records. It also updates the session extend flag since we got data about the accesspoint
+        :param acces_point_object: access_point object
+        :return:
+        """
         if acces_point_object is None:
             raise Exception('access point object cannot be null')
         self.session_extend = True
 
-        #TODO check the channels, power level, connected clients!
+        if acces_point_object.power is not None:
+            minute_difference = datetime.now() - self.session_start
+            minute_difference = (minute_difference.total_seconds() / 60)
+            self.observed_power_levels.append((minute_difference, acces_point_object.power_level))
 
+        # im not logging the time vs channel attribute at the moment
+        if acces_point_object.channel is not None and acces_point_object.channel not in self.spotted_channels :
+            self.spotted_channels.append(acces_point_object.channel)
+
+        if acces_point_object.ssid is not None and acces_point_object.ssid not in self.observed_ssids:
+            self.observed_ssids.append(acces_point_object.ssid)
+
+        #TODO connected clients! This one is a little tricky though...
 
     def record_connected_client(self, client_mac):
         """
@@ -194,7 +233,7 @@ class WifiAcessPointSession(object):
         if self.session_stop is not None:
             raise Exception("Session is closed! cannot add connected client")
         else:
-            self.connected_clients.append((client_mac, datetime.datetime.now()))
+            self.connected_clients.append((client_mac, datetime.now()))
 
     def record_spotted_channel(self, channel):
         """
@@ -205,7 +244,7 @@ class WifiAcessPointSession(object):
         if self.current_channel == channel:
             pass
         else:
-            self.spotted_channels.append((channel, datetime.datetime.now()))
+            self.spotted_channels.append((channel, datetime.now()))
 
     def record_rssi(self, rssi):
         """
@@ -213,7 +252,7 @@ class WifiAcessPointSession(object):
         :param rssi: observed signal strength as interger
         :return:
         """
-        self.observed_power_levels.append((rssi, datetime.datetime.now()))
+        self.observed_power_levels.append((rssi, datetime.now()))
 
     def stop_session(self):
         """
@@ -222,7 +261,7 @@ class WifiAcessPointSession(object):
         """
         if self.session_stop is not None:
             raise Exception("Session is already closed")
-        self.session_stop = datetime.datetime.now()
+        self.session_stop = datetime.now()
 
     def continue_session(self):
         """

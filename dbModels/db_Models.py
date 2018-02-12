@@ -5,9 +5,8 @@ Summary: This file stores the table structures for the client, accesspoint, clie
 just lots of busy work
 """
 
-
 from sqlalchemy import Column, VARCHAR, TEXT, TIMESTAMP, func, Date, Integer
-from declerations import Base, engine, session
+from dbModels.declerations import Base, engine, session
 
 
 class Accesspoint_dbModel(Base):
@@ -28,8 +27,39 @@ class Accesspoint_dbModel(Base):
         :return: none if not registered, the database object if found in the database
         """
         fetched_access_point = session.query(Accesspoint_dbModel).filter_by(access_point_bssid=bssid).first()
+
         return fetched_access_point
 
+
+class AccesspointSession_dbModel(Base):
+
+    __tablename__ = 'accesspoint_sessions'
+    id = Column(Integer, primary_key=True)
+    bssid = Column(VARCHAR(30), nullable=False)
+    session_start = Column(Date, nullable=False, server_default=func.now())
+    session_end = Column(Date)
+    connected_clients = Column(VARCHAR(40), nullable=False) # this is tied to another table
+    spotted_channels = Column(VARCHAR(60), nullable=False) # this is tied to another table
+    observed_rssi = Column(VARCHAR(60), nullable=False) # This is tied to another table
+
+    def __init__(self, bssid, session_start=None):
+        self.bssid = bssid
+        if session_start is not None:
+            self.session_start = session_start
+
+    def end_session(self, end_time=None):
+        if end_time is not None:
+            self.session_end = end_time
+        else:
+            self.session_end = func.now()
+
+    def end_session_with_save(self, session_object):
+        """
+        Record all the findings about the object here.
+        :param session_object:
+        :return:
+        """
+        pass
 
 class WifiClient_dbModel(Base):
     """
@@ -73,7 +103,7 @@ class WifiClientSession_dbModel(Base):
         if session_start is not None:
             self.session_start = session_start
 
-    def end_session(self, end_time = None):
+    def end_session(self, end_time=None):
         if end_time is not None:
             self.session_end = end_time
         else:
