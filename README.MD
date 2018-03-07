@@ -55,6 +55,16 @@ Scappy Installation
 `sudo python3 setup.py install`  
 
 
+A little quick start on Scapy
+
+
+from scapy.all import Dot11,Dot11Beacon,Dot11Elt,RadioTap,sendp,hexdump
+rt = RadioTap(_pkt=packet)
+rt.addr1
+rt[Dot11Elt].info
+rt.__dict__.keys()
+
+
 
 
 Sources: 
