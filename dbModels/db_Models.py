@@ -6,7 +6,7 @@ just lots of busy work
 """
 
 from sqlalchemy import Column, VARCHAR, TEXT, TIMESTAMP, func, Date, Integer
-from dbModels.declerations import Base, engine, session
+from dbModels.declerations import Base, engine, db_session
 
 
 class Accesspoint_dbModel(Base):
@@ -26,7 +26,7 @@ class Accesspoint_dbModel(Base):
         :param bssid: the mac address of the accesspoint
         :return: none if not registered, the database object if found in the database
         """
-        fetched_access_point = session.query(Accesspoint_dbModel).filter_by(access_point_bssid=bssid).first()
+        fetched_access_point = db_session.query(Accesspoint_dbModel).filter_by(access_point_bssid=bssid).first()
 
         return fetched_access_point
 
@@ -81,7 +81,7 @@ class WifiClient_dbModel(Base):
         :param client_mac:
         :return:
         """
-        db_client = session.query(WifiClient_dbModel).filter_by(client_mac=client_mac).first()
+        db_client = db_session.query(WifiClient_dbModel).filter_by(client_mac=client_mac).first()
         return db_client
 
 #TODO change indexing for connected access_points and other aux tables
