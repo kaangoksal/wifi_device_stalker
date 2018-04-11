@@ -24,6 +24,14 @@ raspberry pi will be the sensor suite.
 
 This project is still in progress... 
 
+This is probably how will it look like:
+
+![Alt text](https://github.com/kaangoksal/wifi_device_stalker/blob/master/media/Dashboard.png)
+
+
+Live view page
+
+![Alt text](https://github.com/kaangoksal/wifi_device_stalker/blob/master/media/Live%20View.png)
 
 **Up Coming Features**
 
@@ -36,7 +44,8 @@ This project is still in progress...
 
 **Requirements**  
 
-`sudo apt-get install python3-pip, git, tcpdump python3-crypto ipython3`
+`sudo apt-get install python3-pip, git, tcpdump, python3-crypto, ipython3`
+`pip3 install scapy-python3`
 
 
 Scappy Installation  
@@ -44,6 +53,19 @@ Scappy Installation
 `git clone https://github.com/phaethon/scapy`  
 `cd scapy`  
 `sudo python3 setup.py install`  
+
+
+A little quick start on Scapy
+
+
+from scapy.all import Dot11,Dot11Beacon,Dot11Elt,RadioTap,sendp,hexdump
+rt = RadioTap(_pkt=packet)
+rt.addr1
+rt[Dot11Elt].info
+rt.__dict__.keys()
+
+
+
 
 Sources: 
 https://github.com/DanMcInerney/wifijammer/blob/master/wifijammer.py
