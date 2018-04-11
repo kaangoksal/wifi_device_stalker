@@ -154,6 +154,11 @@ class wifi_device_sniffer_Interface(object):
 
     def filter_clients_and_access_points(self, packet):
         print(type(packet))
+        print(type(packet.payload.payload))
+        print("Address 1: ", packet.addr1)
+        print("Address 2: ", packet.addr2)
+        print("Address 3: ", packet.addr3)
+        
         print("=============================")
         print(packet)
         print("=============================")

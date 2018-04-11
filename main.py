@@ -38,6 +38,8 @@ class main:
         selected_interface = wifi_device_sniffer_Interface("Sniff1", device)
         selected_interface.start_wifi_monitor_mode()
         selected_interface.start_searching()
+
+
         device_thread = Thread(target=self.device_loop, args=[selected_interface])
         device_thread.start()
         print("Device ", device, " started sniffing")
